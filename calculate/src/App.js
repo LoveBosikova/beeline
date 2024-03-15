@@ -27,7 +27,7 @@ function App() {
               Tab content for Хранилище резервных копий
             </Tab>
             <Tab eventKey='veeam' title='Резервное копирование Veeam'>
-              Tab content for Резервное копирование Veeam
+              Tab content for Резервное копирование veeam
             </Tab>
           </Tabs>
         </Form>

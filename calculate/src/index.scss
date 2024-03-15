@@ -8,6 +8,10 @@
   font-weight: bold;
 }
 
+*{
+  font-family: "CraftworkGrotesk-Regular";
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'CraftworkGrotesk-Regular',  'Segoe UI', 'Roboto', 'Oxygen',
@@ -22,6 +26,10 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+main {
+  height: 85vh;
 }
 
 .header {
@@ -41,11 +49,25 @@ code {
   }
 }
 
+.form {
+  @include section-paddings;
+  background-color: $black-main;
+  padding-top: 5%;
+  padding-bottom: 10%;
+  height: 100%;
+}
+
+.tabText {
+  color: $white-main;
+}
+
 .footer {
+  background-color: $black-main;
   position: fixed;
   width: 100%;
   bottom: 0;
   text-align: left;
+  font-family: "CraftworkGrotesk-Regular";
   color: $white-main;
   padding-top: 0.5vh;
   padding-bottom: 1vh;

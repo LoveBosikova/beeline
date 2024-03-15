@@ -28,8 +28,13 @@ code {
     monospace;
 }
 
-main {
-  height: 85vh;
+.main {
+  height:100vh;
+  display: flex;
+  justify-content: space-between;
+  gap: 5%;
+  background-color: $black-main;
+  padding-bottom: 20%;
 }
 
 .header {
@@ -50,15 +55,74 @@ main {
 }
 
 .form {
-  @include section-paddings;
+  margin-left: 7.5vw;
   background-color: $black-main;
-  padding-top: 5%;
-  padding-bottom: 10%;
-  height: 100%;
+  margin-top: 5%;
+  margin-bottom: 10%;
+  width: 60%;
+  min-height: 50%;
+  min-width: fit-content;
+  border: 1px solid $gray-main;
+  border-radius: 7px;
 }
 
 .tabText {
   color: $white-main;
+}
+
+.tarifs{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding-top: 5%;
+}
+
+.tarif {
+  border: 1px solid $gray-main;
+  border-radius: 7px;
+  width: 40%;
+
+  &__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
+  }
+
+  &__title {
+    color: $orange-main;
+  }
+}
+
+// .tarif_active {
+
+//   .tarif__title {
+//     color: $orange-main;
+//   }
+// }
+
+.result {
+  width: 25%;
+  min-width: fit-content;
+  margin-top: 5%;
+  background-color: $black-main;
+  margin-right: 7.5vw;
+
+  &__content {
+    border: 1px solid $gray-main;
+    border-radius: 7px;
+    width: 100%;
+    min-height: 30%;
+  }
+
+  &__title {
+    text-align: left;
+    border-bottom: 1px solid $gray-op;
+    color: $orange-main;
+    padding-left: 5%;
+    padding-top: 2.5%;
+    padding-bottom: 2.5%;
+  }
 }
 
 .footer {

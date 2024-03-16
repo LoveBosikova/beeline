@@ -59,8 +59,9 @@ code {
   background-color: $black-main;
   margin-top: 5%;
   margin-bottom: 10%;
+  padding-bottom: 3%;
   width: 60%;
-  min-height: 50%;
+  min-height: fit-content;
   min-width: fit-content;
   border: 1px solid $gray-main;
   border-radius: 7px;
@@ -68,6 +69,7 @@ code {
 
 .tabText {
   color: $white-main;
+  padding-top: 3%;
 }
 
 .tarifs{
@@ -78,6 +80,7 @@ code {
 }
 
 .tarif {
+  padding-top: 3%;
   border: 1px solid $gray-main;
   border-radius: 7px;
   width: 40%;
@@ -90,16 +93,84 @@ code {
   }
 
   &__title {
-    color: $orange-main;
+    color: $white-main;
+  }
+
+  &__desk {
+    color: $gray-main;
+  }
+
+  &__saleWrap {
+    display: flex;
+    align-items: center;
+    gap: 3%;
+    padding-top: 3%;
+    padding-left: 6.7%;
+    
+    p {
+      margin-bottom: 0;
+      color: $gray-main;
+    }
+
+    input {
+      width: 7.5%;
+    }
+  }
+
+  &__options {
+    margin-left: 6.7%;
+    margin-right: 6.7%;
+    margin-top: 3%;
+  }
+
+  &:hover {
+    cursor: pointer;
   }
 }
 
-// .tarif_active {
+.tarif_active {
+  background-color: $orange-main;
+  border-color: $orange-main;
 
-//   .tarif__title {
-//     color: $orange-main;
-//   }
-// }
+  .tarif__title {
+    color: $black-main;
+  }
+
+  .tarif__desk {
+    color: $black-main;
+  }
+}
+
+.branding {
+  &__wrap{
+    display: flex !important;
+    justify-content: start;
+    align-items: center;
+    gap: 10%;
+  }
+
+  &__switch {
+    display: flex !important;
+    justify-content: start;
+    align-items: center;
+    gap: 3%;
+    width: 40%;
+  }
+
+  &__saleWrap {
+    display: flex;
+    align-items: center;
+    gap: 3%;
+    
+    p {
+      margin-bottom: 0;
+    }
+
+    input {
+      width: 20.5%;
+    }
+  }
+}
 
 .result {
   width: 25%;

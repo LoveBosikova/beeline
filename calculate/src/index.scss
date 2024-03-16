@@ -285,6 +285,23 @@ code {
     gap: 3%;
     font-size: 1vw;
   }
+
+  &__saleWrap {
+    padding-top: 5%;
+    display: flex;
+    align-items: center;
+    gap: 5%;
+    width: 40%;
+
+    input {
+      width: 20%;
+    }
+  
+    p {
+      margin-bottom: 0;
+      color: $white-main;
+    }
+  }
 }
 
 .result {

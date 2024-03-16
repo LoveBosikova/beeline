@@ -35,6 +35,7 @@ function App() {
   const plusGb = data[0].services[0]['DF Workspace Premium'].options[1];
   const fz = data[0].services[0]['DF Workspace Premium'].options[2];
   const plusRepo = data[0].services[0]['DF Workspace Premium'].plus['Хранилище резервных копий'];
+  const plusVeeam = data[0].services[0]['DF Workspace Premium'].plus['Резервное копирование Veeam'];
 
   console.log(data[0].services[0]['DF Workspace Premium']);
 
@@ -104,6 +105,14 @@ function App() {
       setRepoGbSale(+plusRepo.max_discount)
     } else if (value < +plusRepo.max_discount){
       setRepoGbSale(value)
+    }
+  }
+
+  function handleVeeamSale (value) {
+    if (value >= +plusVeeam.max_discount) {
+      setVeeamSale(+plusVeeam.max_discount)
+    } else if (value < +plusVeeam.max_discount){
+      setVeeamSale(value)
     }
   }
 
@@ -247,13 +256,14 @@ function App() {
                       onChange={() => setIsVeeam(!isVeeam)}
                       disabled
                       />}
+              {isVeeam && <label className='veeam__saleWrap'><p className='veeam__saleText'>Скидка:</p><input type='number' min={0} value={veeamSale} onChange={e => handleVeeamSale(e.target.value)} /></label>}
             </Tab>
           </Tabs>
 
 
         </Form>
 
-        <section className='tarif'>
+        <section className='result'>
           <div className='result__content'>
             <p className='result__title'>Вы выбрали:</p>
 

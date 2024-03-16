@@ -310,6 +310,7 @@ code {
   margin-top: 5%;
   background-color: $black-main;
   margin-right: 7.5vw;
+  color: $white-main;
 
   &__content {
     border: 1px solid $gray-main;
@@ -325,6 +326,37 @@ code {
     padding-left: 5%;
     padding-top: 2.5%;
     padding-bottom: 2.5%;
+  }
+
+  &__empty {
+    color: $white-main;
+    text-align: start;
+    padding-left: 5%;
+  }
+
+  &__wrap {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  &__subtitle {
+    text-align: left;
+    font-size: 1vw;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__itemName,
+  &__itemPrice {
+    font-size: 0.85vw;
+  }
+
+  &__saleWrap {
+    display: flex;
+    justify-content: space-between;
   }
 }
 

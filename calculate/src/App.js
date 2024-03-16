@@ -1,5 +1,5 @@
 import './App.scss';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 
 import data from './mock';
 
@@ -11,7 +11,21 @@ import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
 // import ErrorNoTarif from './ui/ErrorNoTarif/ErrorNoTarif';
 
+
 function App() {
+
+  const orderSample = {
+    id: useId(),
+    tarif: {
+      title: '',
+      tarif_discount: 0,
+      price: 0,
+      price_withDiscount: 0,
+    },
+    options: [],
+    plus: [],
+  }
+
   const [key, setKey] = useState('workspace');
   const [tarif, setTarif] = useState('');
   const [tarifSale, setTarifSale] = useState(0);
@@ -28,6 +42,8 @@ function App() {
   const [isVeeam, setIsVeeam] = useState(false);
   const [veeamSale, setVeeamSale] = useState(0);
 
+  const [order, setOrder] = useState(orderSample);
+
   //Сохраняем значения тарифов, чтобы каждый раз не шастать по большому объекту с бека
   const libraTarif = data[0].services[0]['DF Workspace Premium'].types[0];
   const premiumTarif = data[0].services[0]['DF Workspace Premium'].types[1];
@@ -37,7 +53,7 @@ function App() {
   const plusRepo = data[0].services[0]['DF Workspace Premium'].plus['Хранилище резервных копий'];
   const plusVeeam = data[0].services[0]['DF Workspace Premium'].plus['Резервное копирование Veeam'];
 
-  console.log(data[0].services[0]['DF Workspace Premium']);
+  // console.log(data[0].services[0]['DF Workspace Premium']);
 
   const libreClassNames = cn('tarif', {
     'tarif_active': tarif === 'libra',
@@ -47,12 +63,18 @@ function App() {
     'tarif_active': tarif === 'R7Office',
   });
 
-  console.log(!!tarif);
-
   function handleTarifLibra () {
     setTarif('libra');
     setIsFz(false);
+    setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: tarifSale, price_withDiscount: tarifSale ? libraTarif.price/100*(100 - tarifSale) : libraTarif.price}}})
   }
+
+  function handleTarifPremium () {
+    setTarif('R7Office');
+    setOrder({...order, ...{tarif: {title: premiumTarif.title, price: premiumTarif.price, tarif_discount: tarifSale, price_withDiscount: tarifSale ? premiumTarif.price/100*(100 - tarifSale) : premiumTarif.price}}})
+  }
+
+  console.log(order);
 
   function handleTarifSale (value) {
     if (tarif === 'libra') {
@@ -140,7 +162,7 @@ function App() {
                     <p className='tarif__desk'>Оптимальный</p>
                 </label>
                 <label className={R7ClassNames}>
-                    <input className='tarif__input' type="radio" value="R7Office"  checked={tarif === 'R7Office'} onChange={() => setTarif('R7Office')} />
+                    <input className='tarif__input' type="radio" value="R7Office"  checked={tarif === 'R7Office'} onChange={handleTarifPremium} />
                     <h4 className='tarif__title'>R7 Office</h4>
                     <p className='tarif__desk'>Premium</p>
                 </label>
@@ -266,6 +288,19 @@ function App() {
         <section className='result'>
           <div className='result__content'>
             <p className='result__title'>Вы выбрали:</p>
+
+            {order.tarif ==='' && <div className='result__empty'>Вы ещё ничего не выбрали.</div>}
+            {order.tarif.title !=='' && <div className='result__wrap'>
+                              <p className='result__subtitle'>Тариф:</p>
+                              <div className='result__item'>
+                                <p className='result__itemName'>{order.tarif.title}</p>
+                                <p className='result__itemPrice'>{order.tarif.price}₽</p>
+                              </div>
+                              {tarifSale !== 0 && <div className='result__saleWrap'>
+                                <p>С учётом скидки {tarifSale}%:</p>
+                                <p>{tarif === 'libra'? (libraTarif.price/100*(100 - tarifSale)) : (premiumTarif.price/100*(100 - tarifSale))}.00₽</p>
+                              </div>}
+                            </div>}
 
           </div>
         </section>

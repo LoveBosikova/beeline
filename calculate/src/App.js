@@ -16,6 +16,10 @@ function App() {
   const [tarifSale, setTarifSale] = useState(0);
   const [isBranding, setIsBranding] = useState(false);
   const [brandingSale, setBrandingSale] = useState(0);
+  const [countPlusGb, setCountPlusGb] = useState(0);
+  const [salePlusGb, setSalePlusGb] = useState(0);
+  const [isFz, setIsFz] = useState(false);
+  const [fzSale, setFzSale] = useState(0);
 
   //Сохраняем значения тарифов, чтобы каждый раз не шастать по большому объекту с бека
   const libraTarif = data[0].services[0]['DF Workspace Premium'].types[0];
@@ -23,6 +27,8 @@ function App() {
   const branding = data[0].services[0]['DF Workspace Premium'].options[0];
   const plusGb = data[0].services[0]['DF Workspace Premium'].options[1];
   const fz = data[0].services[0]['DF Workspace Premium'].options[2];
+
+  console.log(plusGb);
 
   const libreClassNames = cn('tarif', {
     'tarif_active': tarif === 'libra',
@@ -33,6 +39,11 @@ function App() {
   });
 
   console.log(!!tarif);
+
+  function handleTarifLibra () {
+    setTarif('libra');
+    setIsFz(false);
+  }
 
   function handleTarifSale (value) {
     if (tarif === 'libra') {
@@ -57,12 +68,23 @@ function App() {
   }
 
   function handleBrandingSale (value) {
-    console.log(value);
       if (value >= +branding.max_discount) {
         setBrandingSale(+branding.max_discount)
       } else if (value < +branding.max_discount){
         setBrandingSale(value)
       }
+  }
+
+  function handleCountPlusGb (value) {
+    setCountPlusGb(value);
+  }
+
+  function handleFzSale (value) {
+    if (value >= +fz.max_discount) {
+      setFzSale(+fz.max_discount)
+    } else if (value < +fz.max_discount){
+      setFzSale(value)
+    }
   }
 
 
@@ -84,7 +106,7 @@ function App() {
               <h3 className='tabText'>Выберите тариф DF Workspace Premium</h3>
               <div className='tarifs'>
                 <label className={libreClassNames} >
-                    <input className='tarif__input' type="radio" value="libra" checked={tarif === 'libra'} onChange={() => setTarif('libra')} />
+                    <input className='tarif__input' type="radio" value="libra" checked={tarif === 'libra'} onChange={handleTarifLibra} />
                     <h4 className='tarif__title'>Libre</h4>
                     <p className='tarif__desk'>Оптимальный</p>
                 </label>
@@ -94,7 +116,7 @@ function App() {
                     <p className='tarif__desk'>Premium</p>
                 </label>
               </div>
-              {tarif !== '' && <label className='tarif__saleWrap'><p>Скидка:</p><input value={tarifSale} onChange={e => handleTarifSale(e.target.value)} /></label>}
+              {tarif !== '' && <label className='tarif__saleWrap'><p>Скидка:</p><input type='number' min={0} value={tarifSale} onChange={e => handleTarifSale(e.target.value)} /></label>}
 
               <Accordion className='tarif__options'>
                 <Accordion.Item eventKey={branding.id}>
@@ -116,19 +138,37 @@ function App() {
                       onChange={handleIsBrandind}
                       disabled
                       />}
-                      {isBranding && <label className='branding__saleWrap'><p>Скидка:</p><input value={brandingSale} onChange={e => handleBrandingSale(e.target.value)} /></label>}
+                      {isBranding && <label className='branding__saleWrap'><p>Скидка:</p><input type='number' min={0} value={brandingSale} onChange={e => handleBrandingSale(e.target.value)} /></label>}
                   </Accordion.Body>
                 </Accordion.Item>
                 <Accordion.Item eventKey={plusGb.id}>
                   <Accordion.Header>{plusGb.title}</Accordion.Header>
-                  <Accordion.Body>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                  <Accordion.Body className='plusGb'>
+                  <label className='plusGb__gbWrap'><p>Дополнительные Гб:</p>{tarif !== '' ? <input type='number' value={countPlusGb} min={0} onChange={e => handleCountPlusGb(e.target.value)} /> : <input type='number' disabled value={countPlusGb} min={0} onChange={e => handleCountPlusGb(e.target.value)} />}</label>
+                  {countPlusGb > 0 && <label className='plusGb__saleWrap'><p>Скидка:</p><input type='number' value={salePlusGb} min={0} max={plusGb.max_discount} onChange={e => setSalePlusGb(e.target.value)} /></label>}
                   </Accordion.Body>
                 </Accordion.Item>
                 <Accordion.Item eventKey={fz.id}>
                   <Accordion.Header>{fz.title}</Accordion.Header>
-                  <Accordion.Body>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                  <Accordion.Body className='fz'>
+                  {tarif === 'R7Office'? <Form.Check // prettier-ignore
+                      className='fz__switch'
+                      type="switch"
+                      id="custom-switch"
+                      label="Добавить в заказ"
+                      checked={isFz}
+                      onChange={() => setIsFz(!isFz)}
+                      /> : <Form.Check // prettier-ignore
+                      className='fz__switch'
+                      type="switch"
+                      id="custom-switch"
+                      label="Добавить в заказ"
+                      checked={isFz}
+                      onChange={() => setIsFz(!isFz)}
+                      disabled
+                      />}
+                      {isFz && <label className='branding__saleWrap'><p>Скидка:</p><input type='number' min={0} value={fzSale} onChange={e => handleFzSale(e.target.value)} /></label>}
+                      
                   </Accordion.Body>
                 </Accordion.Item>
               </Accordion>

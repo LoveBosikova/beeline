@@ -61,6 +61,7 @@ code {
   margin-bottom: 10%;
   padding-bottom: 3%;
   width: 60%;
+  height: 100%;
   min-height: fit-content;
   min-width: fit-content;
   border: 1px solid $gray-main;
@@ -169,6 +170,43 @@ code {
     input {
       width: 20.5%;
     }
+  }
+}
+
+.plusGb {
+  display: flex;
+  padding-top: 2%;
+  padding-bottom: 2%;
+
+  &__gbWrap,
+  &__saleWrap {
+  display: flex;
+  align-items: center;
+  gap: 5%;
+  width: 40%;
+
+  input {
+    width: 20%;
+  }
+
+  p {
+    margin-bottom: 0;
+  }
+  }
+}
+
+.fz {
+    display: flex !important;
+    justify-content: start;
+    align-items: center;
+    gap: 10%;
+
+  &__switch {
+    display: flex !important;
+    justify-content: start;
+    align-items: center;
+    gap: 3%;
+    width: 40%;
   }
 }
 

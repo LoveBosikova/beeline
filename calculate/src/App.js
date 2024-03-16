@@ -9,6 +9,7 @@ import Form from 'react-bootstrap/Form';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
+// import ErrorNoTarif from './ui/ErrorNoTarif/ErrorNoTarif';
 
 function App() {
   const [key, setKey] = useState('workspace');
@@ -21,14 +22,21 @@ function App() {
   const [isFz, setIsFz] = useState(false);
   const [fzSale, setFzSale] = useState(0);
 
+  const [repoGb, setRepoGb] = useState(0);
+  const [repoGbSale, setRepoGbSale] = useState(0);
+
+  const [isVeeam, setIsVeeam] = useState(false);
+  const [veeamSale, setVeeamSale] = useState(0);
+
   //Сохраняем значения тарифов, чтобы каждый раз не шастать по большому объекту с бека
   const libraTarif = data[0].services[0]['DF Workspace Premium'].types[0];
   const premiumTarif = data[0].services[0]['DF Workspace Premium'].types[1];
   const branding = data[0].services[0]['DF Workspace Premium'].options[0];
   const plusGb = data[0].services[0]['DF Workspace Premium'].options[1];
   const fz = data[0].services[0]['DF Workspace Premium'].options[2];
+  const plusRepo = data[0].services[0]['DF Workspace Premium'].plus['Хранилище резервных копий'];
 
-  console.log(plusGb);
+  console.log(data[0].services[0]['DF Workspace Premium']);
 
   const libreClassNames = cn('tarif', {
     'tarif_active': tarif === 'libra',
@@ -84,6 +92,18 @@ function App() {
       setFzSale(+fz.max_discount)
     } else if (value < +fz.max_discount){
       setFzSale(value)
+    }
+  }
+
+  function handleRepoGb (value) {
+    setRepoGb(value);
+  };
+
+  function handleRepoGbSale (value) {
+    if (value >= +plusRepo.max_discount) {
+      setRepoGbSale(+plusRepo.max_discount)
+    } else if (value < +plusRepo.max_discount){
+      setRepoGbSale(value)
     }
   }
 
@@ -167,18 +187,66 @@ function App() {
                       onChange={() => setIsFz(!isFz)}
                       disabled
                       />}
-                      {isFz && <label className='branding__saleWrap'><p>Скидка:</p><input type='number' min={0} value={fzSale} onChange={e => handleFzSale(e.target.value)} /></label>}
+                      {isFz && <label className='branding__saleWrap'><p>Скидка:</p><input type='number' min={0} max={+plusRepo.max_discount} value={fzSale} onChange={e => handleFzSale(e.target.value)} /></label>}
                       
                   </Accordion.Body>
                 </Accordion.Item>
               </Accordion>
+            </Tab>
 
+            <Tab className='repoGb' eventKey='backspace' title='Хранилище резервных копий'>
+                <Form.Label>
+                    <h3 className='repoGb__title'>Гб в хранилище...</h3>
+                </Form.Label>
+                {tarif !== '' ? <Form.Range
+                    value={repoGb}
+                    name='repoGb'
+                    step={100}
+                    min={0}
+                    max={30000}
+                    onChange={(e) => handleRepoGb(e.target.value)}
+                    className="repoGb__slider"
+                    /> : <Form.Range
+                    value={repoGb}
+                    disabled
+                    name='repoGb'
+                    step={100}
+                    min={0}
+                    max={30000}
+                    onChange={(e) => handleRepoGb(e.target.value)}
+                    className="repoGb__slider"
+                    />}
+                <div className='repoGb__values'>
+                  <p>100 Гб.</p>
+                  <p>30 Тб.</p>
+                </div>
+                <div className='repoGb__resWrap'>
+                  <h5 className='repoGb__res'>В хранилище: {repoGb} Гб.</h5>
+                  {repoGb > 0 && <label className='repoGb__saleWrap'><p className='repoGb__saleText'>Скидка:</p><input type='number' min={0} value={repoGbSale} onChange={e => handleRepoGbSale(e.target.value)} /></label>}
+                </div>
             </Tab>
-            <Tab eventKey='backspace' title='Хранилище резервных копий'>
-              Tab content for Хранилище резервных копий
-            </Tab>
-            <Tab eventKey='veeam' title='Резервное копирование Veeam'>
-              Tab content for Резервное копирование veeam
+
+            <Tab eventKey='veeam' title='Резервное копирование Veeam' className='veeam'>
+              <Form.Label>
+                <h3 className='veeam__title'>Резервное копирование ВМ с администрированием</h3>
+                <p className='veeam__subtitle'>Помесячная оплата в зависимости от потребления</p>
+              </Form.Label>
+              {tarif !== '' ? <Form.Check // prettier-ignore
+                      className='veeam__switch'
+                      type="switch"
+                      id="custom-switch"
+                      label="Добавить резервное копирование ВМ с администрированием в заказ"
+                      checked={isVeeam}
+                      onChange={() => setIsVeeam(!isVeeam)}
+                      /> : <Form.Check // prettier-ignore
+                      className='veeam__switch'
+                      type="switch"
+                      id="custom-switch"
+                      label="Добавить резервное копирование ВМ с администрированием в заказ"
+                      checked={isVeeam}
+                      onChange={() => setIsVeeam(!isVeeam)}
+                      disabled
+                      />}
             </Tab>
           </Tabs>
 

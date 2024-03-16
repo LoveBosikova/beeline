@@ -210,6 +210,83 @@ code {
   }
 }
 
+.repoGb {
+  @include section-paddings;
+
+  &__title {
+    padding-top: 15%;
+    color: $white-main;
+  }
+
+  &__slider {
+    padding-top: 10% !important;
+    padding-bottom: 3% !important;
+  }
+
+  &__values {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    color: $white-main;
+    padding-bottom: 10%;
+  }
+
+  &__resWrap {
+    display: flex;
+    justify-content: start;
+    gap: 10%;
+  }
+
+  &__res {
+    text-align: start;
+    color: $orange-main;
+    margin-bottom: 0;
+  }
+
+  &__saleText {
+    color: $white-main;
+  }
+
+  &__saleWrap {
+    display: flex;
+    align-items: center;
+    gap: 5%;
+    width: 40%;
+    
+
+    input {
+      width: 20%;
+    }
+  
+    p {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.veeam {
+  @include section-paddings;
+
+  &__title {
+    padding-top: 8%;
+    color: $white-main;
+  }
+
+  &__subtitle {
+    color: $gray-main;
+    padding-bottom: 5%;
+  }
+
+  &__switch {
+    color: $white-main;
+    display: flex !important;
+    justify-content: start;
+    align-items: flex-start;
+    gap: 3%;
+    font-size: 1vw;
+  }
+}
+
 .result {
   width: 25%;
   min-width: fit-content;

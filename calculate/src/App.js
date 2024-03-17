@@ -80,23 +80,31 @@ function App() {
     if (tarif === 'libra') {
       if (value >= +libraTarif.max_discount) {
         setTarifSale(+libraTarif.max_discount)
-      } else if (value < +libraTarif.max_discount){
+        setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: libraTarif.max_discount, price_withDiscount: libraTarif.price/100*(100 - libraTarif.max_discount)}}});
         setTarifSale(value)
+        setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: value, price_withDiscount: libraTarif.price/100*(100 - value)}}})
       }
     }
 
     if (tarif === 'R7Office') {
       if (value >= +premiumTarif.max_discount) {
         setTarifSale(+premiumTarif.max_discount)
+        setOrder({...order, ...{tarif: {title: premiumTarif.title, price: premiumTarif.price, tarif_discount: premiumTarif.max_discount, price_withDiscount: premiumTarif.price/100*(100 - premiumTarif.max_discount)}}})
       } else if (value < +premiumTarif.max_discount) {
         setTarifSale(+value)
+        setOrder({...order, ...{tarif: {title: premiumTarif.title, price: premiumTarif.price, tarif_discount: value, price_withDiscount: premiumTarif.price/100*(100 - value)}}})
       }
     }
   }
 
   function handleIsBrandind () {
     setIsBranding(!isBranding)
+    if (isBranding) {
+      setOrder({...order, ...{options: order.options.push({title: 'Брендирование web-интерфейса', price: branding.price, branding_discount: brandingSale, price_withDiscount: branding.price/100*(100 - brandingSale)})}})
+    }
   }
+
+  //!тут остановилась на добавлении опций
 
   function handleBrandingSale (value) {
       if (value >= +branding.max_discount) {
@@ -289,7 +297,7 @@ function App() {
           <div className='result__content'>
             <p className='result__title'>Вы выбрали:</p>
 
-            {order.tarif ==='' && <div className='result__empty'>Вы ещё ничего не выбрали.</div>}
+            {order.tarif.title ==='' && <div className='result__empty'>Вы ещё ничего не выбрали.</div>}
             {order.tarif.title !=='' && <div className='result__wrap'>
                               <p className='result__subtitle'>Тариф:</p>
                               <div className='result__item'>
@@ -298,7 +306,7 @@ function App() {
                               </div>
                               {tarifSale !== 0 && <div className='result__saleWrap'>
                                 <p>С учётом скидки {tarifSale}%:</p>
-                                <p>{tarif === 'libra'? (libraTarif.price/100*(100 - tarifSale)) : (premiumTarif.price/100*(100 - tarifSale))}.00₽</p>
+                                <p>{order.tarif.price_withDiscount}.00₽</p>
                               </div>}
                             </div>}
 

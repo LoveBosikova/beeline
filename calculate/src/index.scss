@@ -208,6 +208,22 @@ code {
     gap: 3%;
     width: 40%;
   }
+
+  &__saleWrap {
+    display: flex;
+    align-items: center;
+    gap: 5%;
+    width: 40%;
+
+    input {
+      width: 20%;
+    }
+  
+    p {
+      margin-bottom: 0;
+      color: $white-main;
+    }
+  }
 }
 
 .repoGb {
@@ -357,6 +373,10 @@ code {
   &__saleWrap {
     display: flex;
     justify-content: space-between;
+  }
+
+  &__sale {
+    font-size: 0.85vw;
   }
 }
 

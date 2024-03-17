@@ -1,4 +1,5 @@
 import './App.scss';
+import React from 'react';
 import { useState, useEffect, useId } from 'react';
 
 import data from './mock';
@@ -9,7 +10,6 @@ import Form from 'react-bootstrap/Form';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
-// import ErrorNoTarif from './ui/ErrorNoTarif/ErrorNoTarif';
 
 
 function App() {
@@ -74,13 +74,13 @@ function App() {
     setOrder({...order, ...{tarif: {title: premiumTarif.title, price: premiumTarif.price, tarif_discount: tarifSale, price_withDiscount: tarifSale ? premiumTarif.price/100*(100 - tarifSale) : premiumTarif.price}}})
   }
 
-  console.log(order);
-
   function handleTarifSale (value) {
+    console.log(tarif);
     if (tarif === 'libra') {
       if (value >= +libraTarif.max_discount) {
         setTarifSale(+libraTarif.max_discount)
         setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: libraTarif.max_discount, price_withDiscount: libraTarif.price/100*(100 - libraTarif.max_discount)}}});
+      } else if (value < +libraTarif.max_discount) {
         setTarifSale(value)
         setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: value, price_withDiscount: libraTarif.price/100*(100 - value)}}})
       }
@@ -98,25 +98,62 @@ function App() {
   }
 
   function handleIsBrandind () {
-    setIsBranding(!isBranding)
-    if (isBranding) {
-      setOrder({...order, ...{options: order.options.push({title: 'Брендирование web-интерфейса', price: branding.price, branding_discount: brandingSale, price_withDiscount: branding.price/100*(100 - brandingSale)})}})
+    if (!isBranding) {
+      const newOptions = [...order.options, {id: 1, title: 'Брендирование web-интерфейса', price: branding.price, discount: brandingSale, price_withDiscount: branding.price/100*(100 - brandingSale)}];
+      setOrder({...order, ...{options: newOptions}});
+    } else if (isBranding) {
+      const newOptions = order.options.filter((option)=> option.id !== 1);
+      setOrder({...order, ...{options: newOptions}})
     }
+    setIsBranding(!isBranding);
   }
-
-  //!тут остановилась на добавлении опций
 
   function handleBrandingSale (value) {
       if (value >= +branding.max_discount) {
-        setBrandingSale(+branding.max_discount)
+        setBrandingSale(+branding.max_discount);
+        setOrder({...order, ...{options: order.options.map((option) => {
+          if (option.id === 1) {
+            option.discount = branding.max_discount;
+            option.price_withDiscount = branding.price/100*(100 - branding.max_discount);
+          }
+          return option;
+        })}});
       } else if (value < +branding.max_discount){
-        setBrandingSale(value)
+        setBrandingSale(value);
+        setOrder({...order, ...{options: order.options.map((option) => {
+          if (option.id === 1) {
+            option.discount = value;
+            option.price_withDiscount = branding.price/100*(100 - value);
+          }
+          return option;
+        })}});
       }
   }
 
   function handleCountPlusGb (value) {
-    setCountPlusGb(value);
+    if (+value === 0) {
+      const newOptions = order.options.filter((option)=> option.id !== 2);
+      setOrder({...order, ...{options: newOptions}})
+    } else if (value > 0) {
+      if (+value === 1) {
+        const newOptions = [...order.options, {id: 2, title: `DF Workspace Premium plus ${countPlusGb} GB`, price: plusGb.price, discount: salePlusGb, price_withDiscount: plusGb.price/100*(100 - salePlusGb)}];
+        setOrder({...order, ...{options: newOptions}});
+      } else if (+value >= 2) {
+        const newOptions = order.options.map((option) => {
+          if (option.id === 2) {
+            option.title = `DF Workspace Premium plus ${countPlusGb} GB`;
+            option.price = (plusGb.price*countPlusGb).toFixed(2);
+            option.price_withDiscount = (((plusGb.price*countPlusGb)/100)*(100 - salePlusGb)).toFixed(2);
+          }
+          return option;
+        })
+        setOrder({...order, ...{options: newOptions}});
+      }
+    }
+    setCountPlusGb(+value);
   }
+
+  console.log(order);
 
   function handleFzSale (value) {
     if (value >= +fz.max_discount) {
@@ -184,14 +221,14 @@ function App() {
                     {tarif? <Form.Check // prettier-ignore
                       className='branding__switch'
                       type="switch"
-                      id="custom-switch"
+                      id="branding-switch"
                       label="Добавить в заказ"
                       checked={isBranding}
                       onChange={handleIsBrandind}
                       /> : <Form.Check // prettier-ignore
                       className='branding__switch'
                       type="switch"
-                      id="custom-switch"
+                      id="branding-switch"
                       label="Добавить в заказ"
                       checked={isBranding}
                       onChange={handleIsBrandind}
@@ -213,20 +250,20 @@ function App() {
                   {tarif === 'R7Office'? <Form.Check // prettier-ignore
                       className='fz__switch'
                       type="switch"
-                      id="custom-switch"
+                      id="fz-switch"
                       label="Добавить в заказ"
                       checked={isFz}
                       onChange={() => setIsFz(!isFz)}
                       /> : <Form.Check // prettier-ignore
                       className='fz__switch'
                       type="switch"
-                      id="custom-switch"
+                      id="fz-switch"
                       label="Добавить в заказ"
                       checked={isFz}
                       onChange={() => setIsFz(!isFz)}
                       disabled
                       />}
-                      {isFz && <label className='branding__saleWrap'><p>Скидка:</p><input type='number' min={0} max={+plusRepo.max_discount} value={fzSale} onChange={e => handleFzSale(e.target.value)} /></label>}
+                      {isFz && <label className='fz__saleWrap'><p>Скидка:</p><input type='number' min={0} max={+plusRepo.max_discount} value={fzSale} onChange={e => handleFzSale(e.target.value)} /></label>}
                       
                   </Accordion.Body>
                 </Accordion.Item>
@@ -305,11 +342,28 @@ function App() {
                                 <p className='result__itemPrice'>{order.tarif.price}₽</p>
                               </div>
                               {tarifSale !== 0 && <div className='result__saleWrap'>
-                                <p>С учётом скидки {tarifSale}%:</p>
-                                <p>{order.tarif.price_withDiscount}.00₽</p>
+                                <p className='result__sale'>С учётом скидки {tarifSale}%:</p>
+                                <p className='result__sale'>{order.tarif.price_withDiscount}.00₽</p>
                               </div>}
                             </div>}
-
+            {order.options.length > 0 && <div className='result__wrap'>
+                              <p className='result__subtitle'>Опции к тарифу:</p>
+                              {order.options.map((option) => {
+                                return(
+                                  <React.Fragment key={option.id}>
+                                  <div className='result__item'>
+                                    <p className='result__itemName'>{option.title}</p>
+                                    <p className='result__itemPrice'>{option.price}₽</p>
+                                  </div>
+                                  {brandingSale !== '0' && brandingSale !== 0 && <div className='result__saleWrap'>
+                                  <p className='result__sale'>С учётом скидки {option.discount}%:</p>
+                                  <p className='result__sale'>{option.price_withDiscount}₽</p>
+                                </div>}
+                                </React.Fragment>
+                                )
+                              })}
+                            </div>
+            }
           </div>
         </section>
 

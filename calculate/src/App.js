@@ -66,7 +66,8 @@ function App() {
   function handleTarifLibra () {
     setTarif('libra');
     setIsFz(false);
-    setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: tarifSale, price_withDiscount: tarifSale ? libraTarif.price/100*(100 - tarifSale) : libraTarif.price}}})
+    const newOptions = order.options.filter((option)=> option.id !== 3);
+    setOrder({...order, ...{tarif: {title: libraTarif.title, price: libraTarif.price, tarif_discount: tarifSale, price_withDiscount: tarifSale ? libraTarif.price/100*(100 - tarifSale) : libraTarif.price}}, ...{options: newOptions}})
   }
 
   function handleTarifPremium () {
@@ -75,7 +76,6 @@ function App() {
   }
 
   function handleTarifSale (value) {
-    console.log(tarif);
     if (tarif === 'libra') {
       if (value >= +libraTarif.max_discount) {
         setTarifSale(+libraTarif.max_discount)
@@ -153,15 +153,33 @@ function App() {
     setCountPlusGb(+value);
   }
 
-  console.log(order);
+  function handleFz () {
+    if (!isFz) {
+      const newOptions = [...order.options, {id: 3, title: 'DF Workspace Premium FZ-152', price: fz.price, discount: fzSale, price_withDiscount: fz.price/100*(100 - fzSale)}];
+      setOrder({...order, ...{options: newOptions}});
+    } else if (isFz) {
+      const newOptions = order.options.filter((option)=> option.id !== 3);
+      setOrder({...order, ...{options: newOptions}});
+    }
+    setIsFz(!isFz)
+  }
 
   function handleFzSale (value) {
     if (value >= +fz.max_discount) {
       setFzSale(+fz.max_discount)
     } else if (value < +fz.max_discount){
-      setFzSale(value)
+      setFzSale(value);
+      setOrder({...order, ...{options: order.options.map((option) => {
+        if (option.id === 3) {
+          option.discount = value;
+          option.price_withDiscount = fz.price/100*(100 - value);
+        }
+        return option;
+      })}});
     }
   }
+
+  console.log(order);
 
   function handleRepoGb (value) {
     setRepoGb(value);
@@ -253,14 +271,14 @@ function App() {
                       id="fz-switch"
                       label="Добавить в заказ"
                       checked={isFz}
-                      onChange={() => setIsFz(!isFz)}
+                      onChange={handleFz}
                       /> : <Form.Check // prettier-ignore
                       className='fz__switch'
                       type="switch"
                       id="fz-switch"
                       label="Добавить в заказ"
                       checked={isFz}
-                      onChange={() => setIsFz(!isFz)}
+                      onChange={handleFz}
                       disabled
                       />}
                       {isFz && <label className='fz__saleWrap'><p>Скидка:</p><input type='number' min={0} max={+plusRepo.max_discount} value={fzSale} onChange={e => handleFzSale(e.target.value)} /></label>}
@@ -346,22 +364,42 @@ function App() {
                                 <p className='result__sale'>{order.tarif.price_withDiscount}.00₽</p>
                               </div>}
                             </div>}
+
             {order.options.length > 0 && <div className='result__wrap'>
                               <p className='result__subtitle'>Опции к тарифу:</p>
-                              {order.options.map((option) => {
-                                return(
-                                  <React.Fragment key={option.id}>
+
+                              {isBranding && <React.Fragment key={1}>
                                   <div className='result__item'>
-                                    <p className='result__itemName'>{option.title}</p>
-                                    <p className='result__itemPrice'>{option.price}₽</p>
+                                    <p className='result__itemName'>{branding.title}</p>
+                                    <p className='result__itemPrice'>{branding.price}₽</p>
                                   </div>
-                                  {brandingSale !== '0' && brandingSale !== 0 && <div className='result__saleWrap'>
-                                  <p className='result__sale'>С учётом скидки {option.discount}%:</p>
-                                  <p className='result__sale'>{option.price_withDiscount}₽</p>
+                                  {+brandingSale !== 0 && <div className='result__saleWrap'>
+                                  <p className='result__sale'>С учётом скидки {brandingSale}%:</p>
+                                  <p className='result__sale'>{branding.price/100*(100 - brandingSale)}₽</p>
                                 </div>}
-                                </React.Fragment>
-                                )
-                              })}
+                                </React.Fragment>}
+
+                                {countPlusGb > 0 && <React.Fragment key={2}>
+                                  <div className='result__item'>
+                                    <p className='result__itemName'>{`DF Workspace Premium plus ${countPlusGb} GB`}</p>
+                                    <p className='result__itemPrice'>{(plusGb.price*countPlusGb).toFixed(2)}₽</p>
+                                  </div>
+                                  {+salePlusGb !== 0 && <div className='result__saleWrap'>
+                                  <p className='result__sale'>С учётом скидки {salePlusGb}%:</p>
+                                  <p className='result__sale'>{((plusGb.price*countPlusGb)/100*(100 - salePlusGb)).toFixed(2)}₽</p>
+                                </div>}
+                                </React.Fragment>}
+
+                                {isFz && <React.Fragment key={3}>
+                                  <div className='result__item'>
+                                    <p className='result__itemName'>{fz.title}</p>
+                                    <p className='result__itemPrice'>{fz.price}₽</p>
+                                  </div>
+                                  {+fzSale !== 0 && <div className='result__saleWrap'>
+                                  <p className='result__sale'>С учётом скидки {fzSale}%:</p>
+                                  <p className='result__sale'>{(fz.price/100*(100 - fzSale)).toFixed(2)}₽</p>
+                                </div>}
+                                </React.Fragment>}
                             </div>
             }
           </div>

@@ -59,38 +59,6 @@ function App() {
   const plusRepo = data[0].services[0]['DF Workspace Premium'].plus['Хранилище резервных копий'];
   const plusVeeam = data[0].services[0]['DF Workspace Premium'].plus['Резервное копирование Veeam'];
 
-  useEffect(()=> {
-    const tarifPrice = tarif !== 0 ? order.tarif.price : 0;
-    const brandingPrice = isBranding ? order.options.filter((option) => option.id === 1).map((i) => i.price) : 0;
-    const plusGbPrice = countPlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price) : 0;
-    const fzPrice = isFz ? order.options.filter((option) => option.id === 3).map((i) => i.price) : 0;
-    const repoGbPrice = repoGb > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price) : 0;
-    const veeamPrice = isVeeam ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price) : 0;
-
-    const totalPrice = +tarifPrice + +brandingPrice + +plusGbPrice + +fzPrice + +repoGbPrice + +veeamPrice;
-    setPrice(totalPrice.toFixed(2));
-    // setOrder({...order, ...{price: totalPrice}});
-  }, [tarif, isBranding, countPlusGb, isFz, repoGb, isVeeam, order]);
-
-  //! здесь
-
-  useEffect(()=> {
-    const tarifPriceDiscount = tarifSale > 0 ? order.tarif.price_withDiscount : 0;
-    const brandingPriceDiscount = brandingSale > 0 ? order.options.filter((option) => option.id === 1).map((i) => i.price_withDiscount) : 0;
-    const plusGbPriceDiscount = salePlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price_withDiscount) : 0;
-    const fzPriceDiscount = fzSale > 0 ? order.options.filter((option) => option.id === 3).map((i) => i.price_withDiscount) : 0;
-    const repoGbPriceDiscount = repoGbSale > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price_withDiscount) : 0;
-    const veeamPriceDiscount = veeamSale > 0 ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price_withDiscount) : 0;
-
-    const totalPriceDiscount = +tarifPriceDiscount + +brandingPriceDiscount + +plusGbPriceDiscount + +fzPriceDiscount + +repoGbPriceDiscount + +veeamPriceDiscount;
-    setPriceDiscount(totalPriceDiscount.toFixed(2));
-    // setOrder({...order, ...{price_withDiscount: totalPriceDiscount}});
-  }, [tarifSale, brandingSale, salePlusGb, fzSale, repoGbSale, veeamSale, order]);
-
-  useEffect(() => {
-    setOrder({...order, ...{price: price}, ...{price_withDiscount: priceDiscount}, ...{price_withVAT: ((+priceDiscount/100)*120).toFixed(2)}});
-  }, [price, priceDiscount])
-
   const libreClassNames = cn('tarif', {
     'tarif_active': tarif === 'libra',
   });
@@ -151,6 +119,7 @@ function App() {
           if (option.id === 1) {
             option.discount = branding.max_discount;
             option.price_withDiscount = branding.price/100*(100 - branding.max_discount);
+            return option;
           }
           return option;
         })}});
@@ -160,6 +129,7 @@ function App() {
           if (option.id === 1) {
             option.discount = value;
             option.price_withDiscount = branding.price/100*(100 - value);
+            return option;
           }
           return option;
         })}});
@@ -172,7 +142,11 @@ function App() {
       setOrder({...order, ...{options: newOptions}})
     } else if (value > 0) {
       if (+value === 1) {
-        const newOptions = [...order.options, {id: 2, title: `DF Workspace Premium plus ${countPlusGb} GB`, price: plusGb.price, discount: salePlusGb, price_withDiscount: plusGb.price/100*(100 - salePlusGb)}];
+        const newOptions = [...order.options, {id: 2, 
+          title: `DF Workspace Premium plus ${countPlusGb} GB`, 
+          price: plusGb.price*countPlusGb, 
+          discount: salePlusGb, 
+          price_withDiscount: ((plusGb.price*countPlusGb)/100*(100 - salePlusGb)).toFixed(2)}];
         setOrder({...order, ...{options: newOptions}});
       } else if (+value >= 2) {
         const newOptions = order.options.map((option) => {
@@ -180,6 +154,7 @@ function App() {
             option.title = `DF Workspace Premium plus ${countPlusGb} GB`;
             option.price = (plusGb.price*countPlusGb).toFixed(2);
             option.price_withDiscount = (((plusGb.price*countPlusGb)/100)*(100 - salePlusGb)).toFixed(2);
+            return option;
           }
           return option;
         })
@@ -223,6 +198,7 @@ function App() {
         if (option.id === 3) {
           option.discount = value;
           option.price_withDiscount = fz.price/100*(100 - value);
+          return option;
         }
         return option;
       })}});
@@ -252,15 +228,19 @@ function App() {
   };
 
   function handleRepoGbSale (value) {
-      setRepoGbSale(value)
+      setRepoGbSale(value);
 
-      order.plus.map((plus) => {
+      console.log(value);
+      const newPluses = order.plus.map((plus) => {
         if (plus.id === 1) {
           plus.discount = value;
           plus.price_withDiscount = (((plusRepo.price*repoGb)/100)*(100 - value)).toFixed(2);
+          console.log((((plusRepo.price*repoGb)/100)*(100 - value)).toFixed(2));
+          return plus;
         }
         return plus;
       })
+      setOrder({...{order}, ...{plus: newPluses}});
   }
 
   function handleIsVeeam() { 
@@ -285,6 +265,35 @@ function App() {
       return plus;
     })
   }
+
+  useEffect(()=> {
+    const tarifPrice = tarif !== '' ? order.tarif.price : 0;
+    const brandingPrice = isBranding ? order.options.filter((option) => option.id === 1).map((i) => i.price) : 0;
+    const plusGbPrice = countPlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price) : 0;
+    const fzPrice = isFz ? order.options.filter((option) => option.id === 3).map((i) => i.price) : 0;
+    const repoGbPrice = repoGb > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price) : 0;
+    const veeamPrice = isVeeam ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price) : 0;
+
+    const totalPrice = +tarifPrice + +brandingPrice + +plusGbPrice + +fzPrice + +repoGbPrice + +veeamPrice;
+
+    const tarifPriceDiscount = tarifSale > 0 ? order.tarif.price_withDiscount : 0;
+    const brandingPriceDiscount = brandingSale > 0 ? order.options.filter((option) => option.id === 1).map((i) => i.price_withDiscount) : tarif !== '' ? order.tarif.price : 0;
+    const plusGbPriceDiscount = salePlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price_withDiscount) : isBranding ? order.options.filter((option) => option.id === 1).map((i) => i.price) : 0;
+    const fzPriceDiscount = fzSale > 0 ? order.options.filter((option) => option.id === 3).map((i) => i.price_withDiscount) : countPlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price) : 0;
+    const repoGbPriceDiscount = repoGbSale > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price_withDiscount) : isFz ? order.options.filter((option) => option.id === 3).map((i) => i.price) : 0;
+    const veeamPriceDiscount = veeamSale > 0 ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price_withDiscount) : isVeeam ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price) : 0;
+    let totalPriceDiscount = +tarifPriceDiscount + +brandingPriceDiscount + +plusGbPriceDiscount + +fzPriceDiscount + +repoGbPriceDiscount + +veeamPriceDiscount;
+    // console.log(+tarifPriceDiscount, +brandingPriceDiscount, +plusGbPriceDiscount, +fzPriceDiscount, +repoGbPriceDiscount, +veeamPriceDiscount);
+    // console.log('до', totalPriceDiscount);
+
+    totalPriceDiscount = totalPriceDiscount === 0 ? totalPrice : totalPriceDiscount;
+    // console.log(salePlusGb, +plusGbPriceDiscount[0], totalPrice, 'после', totalPriceDiscount, ((+totalPriceDiscount/100)*120).toFixed(2));
+
+    setPrice(totalPrice.toFixed(2));
+    setPriceDiscount(totalPriceDiscount.toFixed(2));
+
+    setOrder({...order, ...{price: totalPrice}, ...{price_withDiscount: totalPriceDiscount.toFixed(2)}, ...{price_withVAT: ((+totalPriceDiscount/100)*120).toFixed(2)}});
+  }, [tarif, isBranding, countPlusGb, isFz, repoGb, isVeeam, price, priceDiscount, tarifSale, brandingSale, salePlusGb, fzSale, repoGbSale, veeamSale, price, ]);
   
   console.log(order);
 
@@ -461,7 +470,7 @@ function App() {
                                   </div>
                                   {+brandingSale !== 0 && <div className='result__saleWrap'>
                                   <p className='result__sale'>С учётом скидки {brandingSale}%:</p>
-                                  <p className='result__salePrice'>{branding.price/100*(100 - brandingSale)}₽</p>
+                                  <p className='result__salePrice'>{branding.price/100*(100 - brandingSale)}.00₽</p>
                                 </div>}
                                 </React.Fragment>}
 
@@ -524,7 +533,7 @@ function App() {
                                 </div>
                                 {priceDiscount > 0 && <div className='result__priceItem'>
                                   <p className='result__itemName'>Цена со скидкой:</p>
-                                  <p className='result__itemPrice'><span className='result__itemPrice--discount'>{priceDiscount}₽</span></p>
+                                  <p className='result__itemPrice'><span className='result__itemPrice--discount'>{order.price_withDiscount}₽</span></p>
                                 </div>}
                                 <div className='result__priceItem'>
                                   <p className='result__itemName'>Цена с учётом НДС:</p>

@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/beeline/static/css/main.f5c7d2c0.css",
-    "main.js": "/beeline/static/js/main.f05564ff.js",
+    "main.css": "/beeline/static/css/main.b816739d.css",
+    "main.js": "/beeline/static/js/main.063085bb.js",
     "static/js/453.1bd22a77.chunk.js": "/beeline/static/js/453.1bd22a77.chunk.js",
     "static/media/CraftworkGrotesk-Regular.ttf": "/beeline/static/media/CraftworkGrotesk-Regular.196876e0b6bc20e7f425.ttf",
     "index.html": "/beeline/index.html",
-    "main.f5c7d2c0.css.map": "/beeline/static/css/main.f5c7d2c0.css.map",
-    "main.f05564ff.js.map": "/beeline/static/js/main.f05564ff.js.map",
+    "main.b816739d.css.map": "/beeline/static/css/main.b816739d.css.map",
+    "main.063085bb.js.map": "/beeline/static/js/main.063085bb.js.map",
     "453.1bd22a77.chunk.js.map": "/beeline/static/js/453.1bd22a77.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f5c7d2c0.css",
-    "static/js/main.f05564ff.js"
+    "static/css/main.b816739d.css",
+    "static/js/main.063085bb.js"
   ]
 }

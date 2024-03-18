@@ -29,12 +29,10 @@ code {
 }
 
 .main {
-  height:100vh;
   display: flex;
   justify-content: space-between;
   gap: 5%;
   background-color: $black-main;
-  padding-bottom: 20%;
 }
 
 .header {
@@ -393,6 +391,33 @@ code {
 
   &__salePrice {
     color: $orange-main;
+  }
+
+  &__priceTitle {
+    text-align: left;
+    border-top: 1px solid $gray-op;
+    color: $orange-main;
+    padding-left: 5%;
+    padding-top: 2.5%;
+    padding-bottom: 2.5%;
+  }
+
+  &__priceItem{
+    padding-left: 5%;
+    padding-right: 5%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__itemPrice {
+    &--discount {
+      color: $orange-main;
+    }
+
+    &--final {
+      color: $orange-main; 
+      font-size: 1vw;
+    }
   }
 }
 

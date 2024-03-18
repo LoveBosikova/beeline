@@ -47,6 +47,9 @@ function App() {
 
   const [order, setOrder] = useState(orderSample);
 
+  const [price, setPrice] = useState(0);
+  const [priceDiscount, setPriceDiscount] = useState(price);
+
   //Сохраняем значения тарифов, чтобы каждый раз не шастать по большому объекту с бека
   const libraTarif = data[0].services[0]['DF Workspace Premium'].types[0];
   const premiumTarif = data[0].services[0]['DF Workspace Premium'].types[1];
@@ -56,7 +59,37 @@ function App() {
   const plusRepo = data[0].services[0]['DF Workspace Premium'].plus['Хранилище резервных копий'];
   const plusVeeam = data[0].services[0]['DF Workspace Premium'].plus['Резервное копирование Veeam'];
 
-  // console.log(data[0].services[0]['DF Workspace Premium']);
+  useEffect(()=> {
+    const tarifPrice = tarif !== 0 ? order.tarif.price : 0;
+    const brandingPrice = isBranding ? order.options.filter((option) => option.id === 1).map((i) => i.price) : 0;
+    const plusGbPrice = countPlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price) : 0;
+    const fzPrice = isFz ? order.options.filter((option) => option.id === 3).map((i) => i.price) : 0;
+    const repoGbPrice = repoGb > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price) : 0;
+    const veeamPrice = isVeeam ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price) : 0;
+
+    const totalPrice = +tarifPrice + +brandingPrice + +plusGbPrice + +fzPrice + +repoGbPrice + +veeamPrice;
+    setPrice(totalPrice.toFixed(2));
+    // setOrder({...order, ...{price: totalPrice}});
+  }, [tarif, isBranding, countPlusGb, isFz, repoGb, isVeeam, order]);
+
+  //! здесь
+
+  useEffect(()=> {
+    const tarifPriceDiscount = tarifSale > 0 ? order.tarif.price_withDiscount : 0;
+    const brandingPriceDiscount = brandingSale > 0 ? order.options.filter((option) => option.id === 1).map((i) => i.price_withDiscount) : 0;
+    const plusGbPriceDiscount = salePlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price_withDiscount) : 0;
+    const fzPriceDiscount = fzSale > 0 ? order.options.filter((option) => option.id === 3).map((i) => i.price_withDiscount) : 0;
+    const repoGbPriceDiscount = repoGbSale > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price_withDiscount) : 0;
+    const veeamPriceDiscount = veeamSale > 0 ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price_withDiscount) : 0;
+
+    const totalPriceDiscount = +tarifPriceDiscount + +brandingPriceDiscount + +plusGbPriceDiscount + +fzPriceDiscount + +repoGbPriceDiscount + +veeamPriceDiscount;
+    setPriceDiscount(totalPriceDiscount.toFixed(2));
+    // setOrder({...order, ...{price_withDiscount: totalPriceDiscount}});
+  }, [tarifSale, brandingSale, salePlusGb, fzSale, repoGbSale, veeamSale, order]);
+
+  useEffect(() => {
+    setOrder({...order, ...{price: price}, ...{price_withDiscount: priceDiscount}, ...{price_withVAT: ((+priceDiscount/100)*120).toFixed(2)}});
+  }, [price, priceDiscount])
 
   const libreClassNames = cn('tarif', {
     'tarif_active': tarif === 'libra',
@@ -470,7 +503,7 @@ function App() {
                                 </div>}
                                 </React.Fragment>}
 
-                              {plusVeeam && <React.Fragment key={2}>
+                              {isVeeam && <React.Fragment key={2}>
                                   <div className='result__item'>
                                     <p className='result__itemName'>{plusVeeam.title}</p>
                                     <p className='result__itemPrice'>{plusVeeam.price}₽</p>
@@ -482,6 +515,23 @@ function App() {
                                 </React.Fragment>}
                             </div>
             } 
+
+            {order.tarif.title !=='' && <div className='result__priceWrap'>
+                                <div className='result__priceTitle'>Итого:</div>
+                                <div className='result__priceItem'>
+                                  <p className='result__itemName'>Цена без скидки:</p>
+                                  <p className='result__itemPrice'>{price}₽</p>
+                                </div>
+                                {priceDiscount > 0 && <div className='result__priceItem'>
+                                  <p className='result__itemName'>Цена со скидкой:</p>
+                                  <p className='result__itemPrice'><span className='result__itemPrice--discount'>{priceDiscount}₽</span></p>
+                                </div>}
+                                <div className='result__priceItem'>
+                                  <p className='result__itemName'>Цена с учётом НДС:</p>
+                                  <p className='result__itemPrice'><span className='result__itemPrice--final'>{order.price_withVAT}₽</span></p>
+                                </div>
+                              </div>
+            }
           </div>
         </section>
 

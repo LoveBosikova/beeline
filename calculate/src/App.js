@@ -10,6 +10,8 @@ import Form from 'react-bootstrap/Form';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 
 function App() {
@@ -49,6 +51,11 @@ function App() {
 
   const [price, setPrice] = useState(0);
   const [priceDiscount, setPriceDiscount] = useState(price);
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   //Сохраняем значения тарифов, чтобы каждый раз не шастать по большому объекту с бека
   const libraTarif = data[0].services[0]['DF Workspace Premium'].types[0];
@@ -213,15 +220,25 @@ function App() {
       if (order.plus.filter((plus => plus.id === 1)).length === 0) {
         const newPlus = [...order.plus, {id: 1, title: `Репозиторий (Хранилище) на ${value} Gb`, price: (plusRepo.price*value).toFixed(2), discount: repoGbSale, price_withDiscount: (((plusRepo.price*value)/100)*(100 - repoGbSale)).toFixed(2)}];
         setOrder({...order, ...{plus: newPlus}});
-      } else if (order.plus.filter((plus => plus.id === 1)).length === 1) {
-        order.plus.map((plus) => {
+      } else if (order.plus.filter((plus => plus.id === 1)).length >= 1) {
+        setOrder({...order, ...{plus: order.plus.map((plus) => {
           if (plus.id === 1) {
             plus.title = `Репозиторий (Хранилище) на ${value} Gb`;
             plus.price = (plusRepo.price*value).toFixed(2);
             plus.price_withDiscount = (((plusRepo.price*value)/100)*(100 - repoGbSale)).toFixed(2);
+            return plus;
           }
           return plus;
-        })
+        })}});
+        // const newPlus = order.plus.map((plus) => {
+        //   if (plus.id === 1) {
+        //     plus.title = `Репозиторий (Хранилище) на ${value} Gb`;
+        //     plus.price = (plusRepo.price*value).toFixed(2);
+        //     plus.price_withDiscount = (((plusRepo.price*value)/100)*(100 - repoGbSale)).toFixed(2);
+        //     return plus;
+        //   }
+        //   return plus;
+        // })
       }
     }
     setRepoGb(value);
@@ -230,17 +247,17 @@ function App() {
   function handleRepoGbSale (value) {
       setRepoGbSale(value);
 
-      console.log(value);
+      // console.log(value);
       const newPluses = order.plus.map((plus) => {
         if (plus.id === 1) {
           plus.discount = value;
           plus.price_withDiscount = (((plusRepo.price*repoGb)/100)*(100 - value)).toFixed(2);
-          console.log((((plusRepo.price*repoGb)/100)*(100 - value)).toFixed(2));
+          // console.log((((plusRepo.price*repoGb)/100)*(100 - value)).toFixed(2));
           return plus;
         }
         return plus;
       })
-      setOrder({...{order}, ...{plus: newPluses}});
+      setOrder({...order, ...{plus: newPluses}});
   }
 
   function handleIsVeeam() { 
@@ -277,24 +294,23 @@ function App() {
     const totalPrice = +tarifPrice + +brandingPrice + +plusGbPrice + +fzPrice + +repoGbPrice + +veeamPrice;
 
     const tarifPriceDiscount = tarifSale > 0 ? order.tarif.price_withDiscount : 0;
+
     const brandingPriceDiscount = brandingSale > 0 ? order.options.filter((option) => option.id === 1).map((i) => i.price_withDiscount) : tarif !== '' ? order.tarif.price : 0;
     const plusGbPriceDiscount = salePlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price_withDiscount) : isBranding ? order.options.filter((option) => option.id === 1).map((i) => i.price) : 0;
-    const fzPriceDiscount = fzSale > 0 ? order.options.filter((option) => option.id === 3).map((i) => i.price_withDiscount) : countPlusGb > 0 ? order.options.filter((option) => option.id === 2).map((i) => i.price) : 0;
-    const repoGbPriceDiscount = repoGbSale > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price_withDiscount) : isFz ? order.options.filter((option) => option.id === 3).map((i) => i.price) : 0;
+    const fzPriceDiscount = fzSale > 0 ? order.options.filter((option) => option.id === 3).map((i) => i.price_withDiscount) : isFz ? order.options.filter((option) => option.id === 3).map((i) => i.price) : 0;
+
+    const repoGbPriceDiscount = repoGbSale > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price_withDiscount) : repoGb > 0 ? order.plus.filter((plus) => plus.id === 1).map((i) => i.price) : 0;
     const veeamPriceDiscount = veeamSale > 0 ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price_withDiscount) : isVeeam ? order.plus.filter((plus) => plus.id === 2).map((i) => i.price) : 0;
     let totalPriceDiscount = +tarifPriceDiscount + +brandingPriceDiscount + +plusGbPriceDiscount + +fzPriceDiscount + +repoGbPriceDiscount + +veeamPriceDiscount;
-    // console.log(+tarifPriceDiscount, +brandingPriceDiscount, +plusGbPriceDiscount, +fzPriceDiscount, +repoGbPriceDiscount, +veeamPriceDiscount);
-    // console.log('до', totalPriceDiscount);
 
     totalPriceDiscount = totalPriceDiscount === 0 ? totalPrice : totalPriceDiscount;
-    // console.log(salePlusGb, +plusGbPriceDiscount[0], totalPrice, 'после', totalPriceDiscount, ((+totalPriceDiscount/100)*120).toFixed(2));
 
     setPrice(totalPrice.toFixed(2));
     setPriceDiscount(totalPriceDiscount.toFixed(2));
 
     setOrder({...order, ...{price: totalPrice}, ...{price_withDiscount: totalPriceDiscount.toFixed(2)}, ...{price_withVAT: ((+totalPriceDiscount/100)*120).toFixed(2)}});
   }, [tarif, isBranding, countPlusGb, isFz, repoGb, isVeeam, price, priceDiscount, tarifSale, brandingSale, salePlusGb, fzSale, repoGbSale, veeamSale, price, ]);
-  
+
   console.log(order);
 
   return (
@@ -542,6 +558,25 @@ function App() {
                               </div>
             }
           </div>
+          <button onClick={handleShow} className='btn--done'>Предложение сформировано!</button>
+
+          <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Что идёт на бек <br></br> (удобнее смотреть в консоли):</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className='modal__result'>{JSON.stringify(order)}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {
+            handleClose();
+            // setOrder(orderSample);
+          }}>
+            Хорошо
+          </Button>
+          {/* <Button variant="primary" onClick={handleClose}>
+            Save Changes
+          </Button> */}
+        </Modal.Footer>
+      </Modal>
         </section>
 
       </main>

@@ -29,7 +29,8 @@ code {
 }
 
 .main {
-  height: 80vh;
+  min-height: 120vh;
+  height: auto;
   display: flex;
   justify-content: space-between;
   gap: 5%;
@@ -419,6 +420,30 @@ code {
       color: $orange-main; 
       font-size: 1vw;
     }
+  }
+}
+
+.btn {
+  &--done {
+    margin-top: 5%;
+    padding: 3.5% 10%;
+    border-radius: 100px;
+    background-color: $black-main;
+    border: 1px solid $white-main;
+    color: $white-main;
+
+    &:hover {
+      background-color: $orange-main;
+      color: $black-main;
+      border: 1px solid $orange-main;
+    }
+  }
+}
+
+.modal {
+  &__result {
+    max-width: 100%;
+    word-break: break-all;
   }
 }
 

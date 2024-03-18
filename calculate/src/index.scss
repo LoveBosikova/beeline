@@ -356,6 +356,7 @@ code {
   }
 
   &__subtitle {
+    color: $orange-main;
     text-align: left;
     font-size: 1vw;
   }
@@ -370,13 +371,28 @@ code {
     font-size: 0.85vw;
   }
 
+  &__itemName {
+    text-align: left;
+  }
+
+  &__itemPrice {
+    align-self: flex-end;
+  }
+
   &__saleWrap {
     display: flex;
     justify-content: space-between;
   }
 
-  &__sale {
-    font-size: 0.85vw;
+  &__sale,
+  &__salePrice {
+    font-size: 0.75vw;
+    margin-top: -3%;
+    margin-bottom: 5%;
+  }
+
+  &__salePrice {
+    color: $orange-main;
   }
 }
 

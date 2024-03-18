@@ -16,6 +16,9 @@ function App() {
 
   const orderSample = {
     id: useId(),
+    price: 0,
+    price_withDiscount: 0,
+    price_withVAT: 0, 
     tarif: {
       title: '',
       tarif_discount: 0,
@@ -153,6 +156,20 @@ function App() {
     setCountPlusGb(+value);
   }
 
+  function handleSalePlusGb (value) {
+    const newOptions = order.options.map((option) => {
+      if (option.id === 2) {
+        option.title = `DF Workspace Premium plus ${countPlusGb} GB`;
+        option.discount = value;
+        option.price_withDiscount = (((plusGb.price*countPlusGb)/100)*(100 - value)).toFixed(2);
+      }
+      return option;
+    })
+    setOrder({...order, ...{options: newOptions}});
+
+    setSalePlusGb(value);
+  }
+
   function handleFz () {
     if (!isFz) {
       const newOptions = [...order.options, {id: 3, title: 'DF Workspace Premium FZ-152', price: fz.price, discount: fzSale, price_withDiscount: fz.price/100*(100 - fzSale)}];
@@ -179,28 +196,64 @@ function App() {
     }
   }
 
-  console.log(order);
-
   function handleRepoGb (value) {
+    if (+value === 0) {
+      const newPlus = order.plus.filter((plus)=> plus.id !== 1);
+      setOrder({...order, ...{plus: newPlus}})
+    } else if (value > 0) {
+      if (order.plus.filter((plus => plus.id === 1)).length === 0) {
+        const newPlus = [...order.plus, {id: 1, title: `Репозиторий (Хранилище) на ${value} Gb`, price: (plusRepo.price*value).toFixed(2), discount: repoGbSale, price_withDiscount: (((plusRepo.price*value)/100)*(100 - repoGbSale)).toFixed(2)}];
+        setOrder({...order, ...{plus: newPlus}});
+      } else if (order.plus.filter((plus => plus.id === 1)).length === 1) {
+        order.plus.map((plus) => {
+          if (plus.id === 1) {
+            plus.title = `Репозиторий (Хранилище) на ${value} Gb`;
+            plus.price = (plusRepo.price*value).toFixed(2);
+            plus.price_withDiscount = (((plusRepo.price*value)/100)*(100 - repoGbSale)).toFixed(2);
+          }
+          return plus;
+        })
+      }
+    }
     setRepoGb(value);
   };
 
   function handleRepoGbSale (value) {
-    if (value >= +plusRepo.max_discount) {
-      setRepoGbSale(+plusRepo.max_discount)
-    } else if (value < +plusRepo.max_discount){
       setRepoGbSale(value)
+
+      order.plus.map((plus) => {
+        if (plus.id === 1) {
+          plus.discount = value;
+          plus.price_withDiscount = (((plusRepo.price*repoGb)/100)*(100 - value)).toFixed(2);
+        }
+        return plus;
+      })
+  }
+
+  function handleIsVeeam() { 
+    if (isVeeam) {
+      const newPlus = order.plus.filter((plus)=> plus.id !== 2);
+      setOrder({...order, ...{plus: newPlus}})
+    } else if (!isVeeam) {
+      const newPlus = [...order.plus, {id: 2, title: `Резервное копирование ВМ с администрированием`, price: plusVeeam.price, discount: veeamSale, price_withDiscount: ((plusVeeam.price/100)*(100 - veeamSale)).toFixed(2)}];
+        setOrder({...order, ...{plus: newPlus}});
     }
+    setIsVeeam(!isVeeam)
   }
 
   function handleVeeamSale (value) {
-    if (value >= +plusVeeam.max_discount) {
-      setVeeamSale(+plusVeeam.max_discount)
-    } else if (value < +plusVeeam.max_discount){
-      setVeeamSale(value)
-    }
-  }
+    setVeeamSale(value)
 
+    order.plus.map((plus) => {
+      if (plus.id === 2) {
+        plus.discount = value;
+        plus.price_withDiscount = ((plusVeeam.price/100)*(100 - value)).toFixed(2);
+      }
+      return plus;
+    })
+  }
+  
+  console.log(order);
 
   return (
     <div className='App' data-bs-theme='dark'>
@@ -259,7 +312,7 @@ function App() {
                   <Accordion.Header>{plusGb.title}</Accordion.Header>
                   <Accordion.Body className='plusGb'>
                   <label className='plusGb__gbWrap'><p>Дополнительные Гб:</p>{tarif !== '' ? <input type='number' value={countPlusGb} min={0} onChange={e => handleCountPlusGb(e.target.value)} /> : <input type='number' disabled value={countPlusGb} min={0} onChange={e => handleCountPlusGb(e.target.value)} />}</label>
-                  {countPlusGb > 0 && <label className='plusGb__saleWrap'><p>Скидка:</p><input type='number' value={salePlusGb} min={0} max={plusGb.max_discount} onChange={e => setSalePlusGb(e.target.value)} /></label>}
+                  {countPlusGb > 0 && <label className='plusGb__saleWrap'><p>Скидка:</p><input type='number' value={salePlusGb} min={0} max={plusGb.max_discount} onChange={(e) => handleSalePlusGb(e.target.value)} /></label>}
                   </Accordion.Body>
                 </Accordion.Item>
                 <Accordion.Item eventKey={fz.id}>
@@ -316,7 +369,7 @@ function App() {
                 </div>
                 <div className='repoGb__resWrap'>
                   <h5 className='repoGb__res'>В хранилище: {repoGb} Гб.</h5>
-                  {repoGb > 0 && <label className='repoGb__saleWrap'><p className='repoGb__saleText'>Скидка:</p><input type='number' min={0} value={repoGbSale} onChange={e => handleRepoGbSale(e.target.value)} /></label>}
+                  {repoGb > 0 && <label className='repoGb__saleWrap'><p className='repoGb__saleText'>Скидка:</p><input type='number' min={0} max={plusRepo.max_discount} value={repoGbSale} onChange={e => handleRepoGbSale(e.target.value)} /></label>}
                 </div>
             </Tab>
 
@@ -331,17 +384,17 @@ function App() {
                       id="custom-switch"
                       label="Добавить резервное копирование ВМ с администрированием в заказ"
                       checked={isVeeam}
-                      onChange={() => setIsVeeam(!isVeeam)}
+                      onChange={handleIsVeeam}
                       /> : <Form.Check // prettier-ignore
                       className='veeam__switch'
                       type="switch"
                       id="custom-switch"
                       label="Добавить резервное копирование ВМ с администрированием в заказ"
                       checked={isVeeam}
-                      onChange={() => setIsVeeam(!isVeeam)}
+                      onChange={handleIsVeeam}
                       disabled
                       />}
-              {isVeeam && <label className='veeam__saleWrap'><p className='veeam__saleText'>Скидка:</p><input type='number' min={0} value={veeamSale} onChange={e => handleVeeamSale(e.target.value)} /></label>}
+              {isVeeam && <label className='veeam__saleWrap'><p className='veeam__saleText'>Скидка:</p><input type='number' min={0} max={plusVeeam.max_discount} value={veeamSale} onChange={e => handleVeeamSale(e.target.value)} /></label>}
             </Tab>
           </Tabs>
 
@@ -361,7 +414,7 @@ function App() {
                               </div>
                               {tarifSale !== 0 && <div className='result__saleWrap'>
                                 <p className='result__sale'>С учётом скидки {tarifSale}%:</p>
-                                <p className='result__sale'>{order.tarif.price_withDiscount}.00₽</p>
+                                <p className='result__salePrice'>{order.tarif.price_withDiscount}.00₽</p>
                               </div>}
                             </div>}
 
@@ -375,7 +428,7 @@ function App() {
                                   </div>
                                   {+brandingSale !== 0 && <div className='result__saleWrap'>
                                   <p className='result__sale'>С учётом скидки {brandingSale}%:</p>
-                                  <p className='result__sale'>{branding.price/100*(100 - brandingSale)}₽</p>
+                                  <p className='result__salePrice'>{branding.price/100*(100 - brandingSale)}₽</p>
                                 </div>}
                                 </React.Fragment>}
 
@@ -386,7 +439,7 @@ function App() {
                                   </div>
                                   {+salePlusGb !== 0 && <div className='result__saleWrap'>
                                   <p className='result__sale'>С учётом скидки {salePlusGb}%:</p>
-                                  <p className='result__sale'>{((plusGb.price*countPlusGb)/100*(100 - salePlusGb)).toFixed(2)}₽</p>
+                                  <p className='result__salePrice'>{((plusGb.price*countPlusGb)/100*(100 - salePlusGb)).toFixed(2)}₽</p>
                                 </div>}
                                 </React.Fragment>}
 
@@ -397,11 +450,38 @@ function App() {
                                   </div>
                                   {+fzSale !== 0 && <div className='result__saleWrap'>
                                   <p className='result__sale'>С учётом скидки {fzSale}%:</p>
-                                  <p className='result__sale'>{(fz.price/100*(100 - fzSale)).toFixed(2)}₽</p>
+                                  <p className='result__salePrice'>{(fz.price/100*(100 - fzSale)).toFixed(2)}₽</p>
                                 </div>}
                                 </React.Fragment>}
                             </div>
-            }
+            } 
+
+            {order.plus.length > 0 && <div className='result__wrap'>
+                              <p className='result__subtitle'>Дополнительно:</p>
+
+                              {repoGb > 0 && <React.Fragment key={1}>
+                                  <div className='result__item'>
+                                    <p className='result__itemName'>{`Репозиторий (Хранилище) на ${repoGb} Gb`}</p>
+                                    <p className='result__itemPrice'>{plusRepo.price*repoGb}₽</p>
+                                  </div>
+                                  {+repoGbSale !== 0 && <div className='result__saleWrap'>
+                                  <p className='result__sale'>С учётом скидки {repoGbSale}%:</p>
+                                  <p className='result__salePrice'>{branding.price/100*(100 - repoGbSale)}₽</p>
+                                </div>}
+                                </React.Fragment>}
+
+                              {plusVeeam && <React.Fragment key={2}>
+                                  <div className='result__item'>
+                                    <p className='result__itemName'>{plusVeeam.title}</p>
+                                    <p className='result__itemPrice'>{plusVeeam.price}₽</p>
+                                  </div>
+                                  {+veeamSale !== 0 && <div className='result__saleWrap'>
+                                  <p className='result__sale'>С учётом скидки {veeamSale}%:</p>
+                                  <p className='result__salePrice'>{(plusVeeam.price/100*(100 - veeamSale)).toFixed(2)}₽</p>
+                                </div>}
+                                </React.Fragment>}
+                            </div>
+            } 
           </div>
         </section>
 
